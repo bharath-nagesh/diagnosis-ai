@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(/opt/homebrew/bin/npm init -y)",
+      "Bash(/opt/homebrew/bin/npm install @capacitor/core @capacitor/cli @capacitor/ios)",
+      "Bash(/opt/homebrew/bin/npx cap init \"DiagnosisAI\" \"com.bharath.diagnosisai\" --web-dir=\"www\")",
+      "Bash(/opt/homebrew/bin/npx cap add ios)",
+      "Bash(/opt/homebrew/bin/npx cap copy ios)",
+      "Bash(/opt/homebrew/bin/npx cap update ios)",
+      "Bash(/opt/homebrew/bin/npx cap sync ios)",
+      "Bash(chmod:*)"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "appId": "com.bharath.diagnosisai",
+  "appName": "DiagnosisAI",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "hostname": "localhost",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "ios": {
+    "minVersion": "13.0",
+    "contentInset": "automatic",
+    "scheme": "DiagnosisAI",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "light",
+      "backgroundColor": "#667eea",
+      "overlay": true
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#667eea",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#ffffff",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  }
+}

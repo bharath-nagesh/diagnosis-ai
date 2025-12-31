@@ -1,0 +1,119 @@
+═══════════════════════════════════════════════════════════════
+  DiagnosisAI - iOS Icon Quick Reference
+═══════════════════════════════════════════════════════════════
+
+📋 REQUIRED FILES CHECKLIST
+
+Step 1: Create Master Icon
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [ ] icon-master-1024.png (1024x1024) - YOUR SOURCE FILE
+      └─ Place in: assets/ios/
+
+Step 2: Generated Icons (18 total)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+iPhone Icons (8):
+  [ ] icon-20@2x.png      (40x40)    - Notifications
+  [ ] icon-20@3x.png      (60x60)    - Notifications
+  [ ] icon-29@2x.png      (58x58)    - Settings
+  [ ] icon-29@3x.png      (87x87)    - Settings
+  [ ] icon-40@2x.png      (80x80)    - Spotlight
+  [ ] icon-40@3x.png      (120x120)  - Spotlight
+  [ ] icon-60@2x.png      (120x120)  - App Icon (iPhone SE)
+  [ ] icon-60@3x.png      (180x180)  - App Icon (iPhone Pro/Plus) ⭐
+
+iPad Icons (9):
+  [ ] icon-20.png         (20x20)    - Notifications
+  [ ] icon-20@2x.png      (40x40)    - Notifications
+  [ ] icon-29.png         (29x29)    - Settings
+  [ ] icon-29@2x.png      (58x58)    - Settings
+  [ ] icon-40.png         (40x40)    - Spotlight
+  [ ] icon-40@2x.png      (80x80)    - Spotlight
+  [ ] icon-76.png         (76x76)    - App Icon
+  [ ] icon-76@2x.png      (152x152)  - App Icon (Retina)
+  [ ] icon-83.5@2x.png    (167x167)  - App Icon (iPad Pro)
+
+App Store (1):
+  [ ] icon-1024.png       (1024x1024) - App Store Marketing ⭐
+
+⭐ = Most important (users see these most)
+
+
+📐 UNIQUE SIZES TO CREATE (if doing manually)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024
+
+
+🚀 QUICK COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Generate all icons automatically:
+   $ cd assets/ios
+   $ ./generate-icons.sh
+
+2. Copy to Xcode project:
+   $ cp -r AppIcon.appiconset ../../ios/App/App/Assets.xcassets/
+
+3. Sync with Capacitor:
+   $ cd ../..
+   $ npx cap sync ios
+
+4. Open in Xcode:
+   $ npx cap open ios
+
+
+✅ DESIGN CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [ ] Size: Exactly 1024x1024 pixels
+  [ ] Format: PNG (no JPEG, no transparency)
+  [ ] Colors: Use #667eea to #764ba2 gradient
+  [ ] Design: Medical/diagnostic theme
+  [ ] No rounded corners (iOS adds automatically)
+  [ ] No alpha channel (must be fully opaque)
+  [ ] High quality (no pixelation or blur)
+  [ ] Readable at 40x40 (smallest size)
+  [ ] Consistent across all sizes
+
+
+🎨 COLOR CODES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Primary Gradient:
+  #667eea  RGB(102, 126, 234)  HSL(228, 76%, 66%)
+  #764ba2  RGB(118, 75, 162)   HSL(270, 37%, 46%)
+
+Accent Colors:
+  #a78bfa  (Light Purple)
+  #5b21b6  (Dark Purple)
+
+
+⚠️  COMMON MISTAKES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ❌ Adding rounded corners yourself
+  ❌ Using JPEG instead of PNG
+  ❌ Including transparency/alpha channel
+  ❌ Wrong dimensions (must be exact)
+  ❌ Text too small to read at small sizes
+  ❌ Forgetting the 1024x1024 App Store icon
+  ❌ Inconsistent designs across sizes
+
+
+📱 WHERE USERS SEE YOUR ICONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  180x180 - Home screen (iPhone 11 Pro/Max, 12, 13, 14, 15 Pro)
+  120x120 - Home screen (iPhone SE, older models)
+  80x80   - Spotlight search results
+  58x58   - Settings app list
+  1024    - App Store listing (first impression!)
+
+
+🔗 HELPFUL LINKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Apple HIG:   https://developer.apple.com/design/human-interface-guidelines/app-icons
+  AppIcon.co:  https://appicon.co (online generator)
+  Figma:       https://figma.com (design tool)
+
+
+═══════════════════════════════════════════════════════════════
+For detailed information, see:
+  • README.md       - Complete guide
+  • ICON_SIZES.md   - Detailed size specifications
+═══════════════════════════════════════════════════════════════

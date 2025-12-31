@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>DiagnosisAI - Medical Diagnostic Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-container {
+            max-width: 390px;
+            margin: 0 auto;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 390px;
+            height: 844px;
+            background: #ffffff;
+            border-radius: 50px;
+            box-shadow: 
+                0 0 0 14px #1a1a1a,
+                0 0 0 16px #333,
+                0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 32px;
+            background: #1a1a1a;
+            border-radius: 0 0 20px 20px;
+            z-index: 1000;
+        }
+
+        .screen {
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            padding-top: 50px;
+            background: #f8fafc;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px 20px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .screen-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #475569;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .icon-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .primary-btn:active {
+            transform: translateY(2px);
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            background: white;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .secondary-btn:active {
+            background: #f8fafc;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px 16px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        /* Patient Card */
+        .patient-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 6px solid #d1fae5;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .patient-card:active {
+            transform: scale(0.98);
+        }
+
+        .patient-card.urgent {
+            border-left-color: #dc2626;
+            background: linear-gradient(to right, #fef2f2, #ffffff);
+        }
+
+        .patient-card.moderate {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb, #ffffff);
+        }
+
+        .patient-card.routine {
+            border-left-color: #059669;
+        }
+
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .patient-info h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .patient-meta {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .urgency-badge {
+            display: none;
+        }
+
+        .chief-complaint {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 16px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            padding: 10px 16px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Lab Results Styles */
+        .lab-input-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .lab-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lab-input label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lab-input input {
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 17px;
+            font-family: inherit;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .lab-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .lab-result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 4px solid #059669;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .lab-result-card.abnormal {
+            border-left-color: #dc2626;
+            background: linear-gradient(to right, #fef2f2, #ffffff);
+        }
+
+        .lab-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .lab-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .lab-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .lab-value.abnormal {
+            color: #dc2626;
+        }
+
+        .lab-range {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            padding: 6px 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Diagnosis Styles */
+        .diagnosis-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 6px solid #d1fae5;
+            cursor: pointer;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .diagnosis-card:active {
+            transform: scale(0.98);
+        }
+
+        .diagnosis-card.urgent {
+            border-left-color: #dc2626;
+            background: linear-gradient(to right, #fef2f2, #ffffff);
+        }
+
+        .diagnosis-card.moderate {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb, #ffffff);
+        }
+
+        .diagnosis-card.routine {
+            border-left-color: #059669;
+        }
+
+        .diagnosis-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .likelihood {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .icd-code {
+            font-size: 13px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .supporting-text {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        /* Treatment Checklist */
+        .protocol-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .protocol-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #f8fafc;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-item span {
+            font-size: 15px;
+            color: #475569;
+        }
+
+        .alert-banner {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .alert-banner strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        .alert-banner p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Symptoms List */
+        .symptom-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .symptom-list li {
+            padding-left: 20px;
+            position: relative;
+            color: #475569;
+            font-size: 15px;
+        }
+
+        .symptom-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(23px);
+        }
+
+        .toggle-switch:active .toggle-slider:before {
+            width: 26px;
+        }
+
+        @media (max-width: 450px) {
+            body {
+                padding: 10px;
+            }
+
+            .phone-frame {
+                height: calc(100vh - 20px);
+                max-height: 844px;
+                box-shadow: 
+                    0 0 0 8px #1a1a1a,
+                    0 0 0 10px #333,
+                    0 10px 30px rgba(0,0,0,0.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-frame">
+            <div class="notch"></div>
+            
+            <!-- Home Screen: Patient List -->
+            <div class="screen active" id="homeScreen">
+                <div class="header">
+                    <h1 class="app-title">DiagnosisAI</h1>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="icon-btn" onclick="showScreen('statsScreen')">
+                            📊
+                        </button>
+                        <button class="icon-btn" onclick="showScreen('settingsScreen')">⚙️</button>
+                    </div>
+                </div>
+                <div class="main-content">
+                    <div class="search-bar">
+                        <span style="color: #94a3b8;">🔍</span>
+                        <input type="text" placeholder="Search patients...">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <p class="section-label" style="margin: 0;">Active Patients</p>
+                        <button class="primary-btn" onclick="showScreen('newPatientScreen')" style="width: auto; padding: 10px 20px; font-size: 14px;">
+                            ➕ New Patient
+                        </button>
+                    </div>
+
+                    <!-- Patient Cards -->
+                    <div class="patient-card urgent" onclick="viewPatient(1)">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <h3>Robert S.</h3>
+                                <div class="patient-meta">45 yrs • Male • Today, 2:30 PM</div>
+                            </div>
+                        </div>
+                        <div class="chief-complaint">
+                            <strong>Chief Complaint:</strong> Chest pain radiating to left arm, SOB, diaphoresis
+                        </div>
+                    </div>
+
+                    <div class="patient-card urgent" onclick="viewPatient(2)">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <h3>Maria P.</h3>
+                                <div class="patient-meta">28 yrs • Female • Today, 11:15 AM</div>
+                            </div>
+                        </div>
+                        <div class="chief-complaint">
+                            <strong>Chief Complaint:</strong> Severe headache, photophobia, neck stiffness
+                        </div>
+                    </div>
+
+                    <div class="patient-card moderate" onclick="viewPatient(3)">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <h3>Karen L.</h3>
+                                <div class="patient-meta">62 yrs • Female • Today, 9:45 AM</div>
+                            </div>
+                        </div>
+                        <div class="chief-complaint">
+                            <strong>Chief Complaint:</strong> Productive cough, fever 101°F, fatigue
+                        </div>
+                    </div>
+
+                    <div class="patient-card routine" onclick="viewPatient(4)">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <h3>David B.</h3>
+                                <div class="patient-meta">52 yrs • Male • Yesterday</div>
+                            </div>
+                        </div>
+                        <div class="chief-complaint">
+                            <strong>Chief Complaint:</strong> Chest discomfort after meals, reflux symptoms
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 20px; color: #94a3b8;">
+                        <p style="font-size: 14px;">4 active patients</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Patient Screen -->
+            <div class="screen" id="newPatientScreen">
+                <div class="header">
+                    <button class="icon-btn" onclick="showScreen('homeScreen')">←</button>
+                    <h2 class="screen-title">New Patient</h2>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div class="main-content">
+                    <div class="card">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Patient Information</h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="font-size: 13px; font-weight: 600; color: #64748b; display: block; margin-bottom: 8px;">Full Name</label>
+                                <input type="text" placeholder="First Last" style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <label style="font-size: 13px; font-weight: 600; color: #64748b; display: block; margin-bottom: 8px;">Age</label>
+                                    <input type="number" placeholder="45" style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 13px; font-weight: 600; color: #64748b; display: block; margin-bottom: 8px;">Gender</label>
+                                    <select style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px;">
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Chief Complaint</h3>
+                        <textarea style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; font-family: inherit; resize: none;" rows="4" placeholder="Describe symptoms...&#10;e.g., Chest pain radiating to left arm, shortness of breath"></textarea>
+                    </div>
+
+                    <button class="primary-btn" onclick="createPatient()">Create Patient & Start Diagnosis</button>
+                </div>
+            </div>
+
+            <!-- Patient Detail Screen -->
+            <div class="screen" id="patientScreen">
+                <div class="header">
+                    <button class="icon-btn" onclick="showScreen('homeScreen')">←</button>
+                    <h2 class="screen-title" id="patientName">Robert S.</h2>
+                    <button class="icon-btn">⋮</button>
+                </div>
+
+                <div class="tab-nav">
+                    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-btn" onclick="switchTab('diagnosis')">Diagnosis</button>
+                    <button class="tab-btn" onclick="switchTab('labs')">Labs</button>
+                    <button class="tab-btn" onclick="switchTab('treatment')">Treatment</button>
+                    <button class="tab-btn" onclick="switchTab('notes')">Notes</button>
+                </div>
+
+                <div class="main-content">
+                    <!-- Overview Tab -->
+                    <div id="tab-overview" class="tab-content">
+                        <div class="card">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Patient Info</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 14px;">
+                                <div>
+                                    <span style="color: #64748b;">Age:</span>
+                                    <strong style="display: block; color: #1e293b; margin-top: 4px;">45 years</strong>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">Gender:</span>
+                                    <strong style="display: block; color: #1e293b; margin-top: 4px;">Male</strong>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">Visit Time:</span>
+                                    <strong style="display: block; color: #1e293b; margin-top: 4px;">2:30 PM</strong>
+                                </div>
+                                <div>
+                                    <span style="color: #64748b;">Status:</span>
+                                    <strong style="display: block; color: #dc2626; margin-top: 4px;">Urgent</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Chief Complaint</h3>
+                            <p style="font-size: 15px; color: #475569; line-height: 1.6;">
+                                Chest pain radiating to left arm, shortness of breath, diaphoresis. Duration: 30 minutes. Acute onset.
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Vital Signs</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                                <div>
+                                    <span style="font-size: 13px; color: #64748b;">Blood Pressure</span>
+                                    <div style="font-size: 20px; font-weight: 700; color: #dc2626; margin-top: 4px;">160/95</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 13px; color: #64748b;">Heart Rate</span>
+                                    <div style="font-size: 20px; font-weight: 700; color: #dc2626; margin-top: 4px;">102</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 13px; color: #64748b;">SpO2</span>
+                                    <div style="font-size: 20px; font-weight: 700; color: #059669; margin-top: 4px;">96%</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 13px; color: #64748b;">Temperature</span>
+                                    <div style="font-size: 20px; font-weight: 700; color: #059669; margin-top: 4px;">98.2°F</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: #fef2f2; border-color: #fee2e2;">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #991b1b;">Current Assessment</h3>
+                            <p style="font-size: 15px; color: #991b1b; line-height: 1.6;">
+                                Probable acute myocardial infarction. ECG and troponin ordered. Cardiology consult requested.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Diagnosis Tab -->
+                    <div id="tab-diagnosis" class="tab-content" style="display: none;">
+                        <p class="section-label">Differential Diagnosis</p>
+
+                        <div class="diagnosis-card urgent">
+                            <h3 class="diagnosis-name">Myocardial Infarction</h3>
+                            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                                <span class="likelihood">78% likelihood</span>
+                                <span class="icd-code">ICD-10: I21.9</span>
+                            </div>
+                            <div class="supporting-text">
+                                <strong>Supporting:</strong> Substernal chest pain with radiation, diaphoresis, elevated vitals, male 45+, acute onset >20min
+                            </div>
+                        </div>
+
+                        <div class="diagnosis-card moderate">
+                            <h3 class="diagnosis-name">Unstable Angina</h3>
+                            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                                <span class="likelihood">65% likelihood</span>
+                                <span class="icd-code">ICD-10: I20.0</span>
+                            </div>
+                            <div class="supporting-text">
+                                <strong>Supporting:</strong> Similar presentation pattern, urgent evaluation needed
+                            </div>
+                        </div>
+
+                        <div class="diagnosis-card routine">
+                            <h3 class="diagnosis-name">GERD</h3>
+                            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                                <span class="likelihood">35% likelihood</span>
+                                <span class="icd-code">ICD-10: K21.9</span>
+                            </div>
+                            <div class="supporting-text">
+                                <strong>Supporting:</strong> Common cause of chest discomfort, less urgent
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
+                            <h3 style="font-size: 15px; font-weight: 600; color: #1e40af; margin-bottom: 8px;">Evidence Base</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; margin-top: 12px;">
+                                <div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #1e40af;">2,847</div>
+                                    <div style="font-size: 11px; color: #1e40af;">Similar Cases</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #1e40af;">47</div>
+                                    <div style="font-size: 11px; color: #1e40af;">Studies</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #1e40af;">2023</div>
+                                    <div style="font-size: 11px; color: #1e40af;">Guidelines</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Labs Tab -->
+                    <div id="tab-labs" class="tab-content" style="display: none;">
+                        <p class="section-label">Lab Values</p>
+
+                        <div class="card">
+                            <div class="lab-input-grid">
+                                <div class="lab-input">
+                                    <label>Hemoglobin</label>
+                                    <input type="number" placeholder="g/dL" value="8.2" step="0.1">
+                                </div>
+                                <div class="lab-input">
+                                    <label>WBC Count</label>
+                                    <input type="number" placeholder="×10³/μL" value="15.2" step="0.1">
+                                </div>
+                                <div class="lab-input">
+                                    <label>Creatinine</label>
+                                    <input type="number" placeholder="mg/dL" value="1.8" step="0.1">
+                                </div>
+                                <div class="lab-input">
+                                    <label>Troponin</label>
+                                    <input type="number" placeholder="ng/mL" value="0.8" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn">Analyze Results</button>
+
+                        <p class="section-label" style="margin-top: 8px;">AI Interpretation</p>
+
+                        <div class="lab-result-card abnormal">
+                            <div class="lab-result-header">
+                                <span class="lab-name">Hemoglobin</span>
+                                <span class="lab-value abnormal">8.2 g/dL</span>
+                            </div>
+                            <div class="lab-range">Normal: 13.5-17.5 g/dL (Male)</div>
+                            <p style="font-size: 14px; color: #991b1b; margin-top: 12px; line-height: 1.5; font-weight: 500;">
+                                Moderate anemia. Consider iron studies and transfusion threshold.
+                            </p>
+                        </div>
+
+                        <div class="lab-result-card abnormal">
+                            <div class="lab-result-header">
+                                <span class="lab-name">Troponin</span>
+                                <span class="lab-value abnormal">0.8 ng/mL</span>
+                            </div>
+                            <div class="lab-range">Normal: &lt;0.04 ng/mL</div>
+                            <p style="font-size: 14px; color: #991b1b; margin-top: 12px; line-height: 1.5; font-weight: 500;">
+                                CRITICAL: Elevated troponin consistent with myocardial injury.
+                            </p>
+                        </div>
+
+                        <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
+                            <h3 style="font-size: 15px; font-weight: 600; color: #1e40af; margin-bottom: 8px;">Clinical Correlation</h3>
+                            <p style="font-size: 14px; color: #1e40af; line-height: 1.6;">
+                                Lab pattern suggests acute coronary syndrome with possible bleeding. Consider serial troponins and GI workup for anemia source.
+                            </p>
+                        </div>
+
+                        <button class="secondary-btn">📄 Export Lab Report</button>
+                    </div>
+
+                    <!-- Treatment Tab -->
+                    <div id="tab-treatment" class="tab-content" style="display: none;">
+                        <div class="alert-banner">
+                            <div>
+                                <strong>TIME CRITICAL</strong>
+                                <p>Door-to-balloon: 90 minutes</p>
+                            </div>
+                        </div>
+
+                        <div class="protocol-section">
+                            <h3 class="protocol-title">1. Immediate Actions</h3>
+                            <div class="checklist">
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Call cardiology consult</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Aspirin 325mg PO</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Oxygen if SpO2 < 90%</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Establish IV access</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="protocol-section">
+                            <h3 class="protocol-title">2. Diagnostic Workup</h3>
+                            <div class="checklist">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <span>12-lead ECG (stat)</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" checked>
+                                    <span>Cardiac troponin</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox">
+                                    <span>Chest X-ray</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="secondary-btn">📋 View Full STEMI Protocol</button>
+                        <button class="secondary-btn">💊 Check Drug Interactions</button>
+                    </div>
+
+                    <!-- Notes Tab -->
+                    <div id="tab-notes" class="tab-content" style="display: none;">
+                        <p class="section-label">Clinical Note</p>
+
+                        <div class="card" style="background: #fffbeb; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap;">CHIEF COMPLAINT: Chest pain
+
+HPI: 45 y/o male presents with acute onset substernal chest pain radiating to left arm, associated with shortness of breath and diaphoresis. Duration: 30 minutes. Pain described as crushing in nature.
+
+VITALS:
+BP: 160/95  |  HR: 102  |  SpO2: 96%  |  Temp: 98.2°F
+
+ASSESSMENT:
+1. Acute Myocardial Infarction (I21.9) - HIGH (78%)
+   - Typical presentation with radiation
+   - Time-sensitive emergency
+2. Unstable Angina (I20.0) - CONSIDER (65%)
+3. GERD (K21.9) - POSSIBLE (35%)
+
+PLAN:
+- STAT ECG → Completed
+- Cardiac biomarkers → Pending
+- Aspirin 325mg PO given
+- Cardiology consult requested
+- NPO, IV access established
+- Continuous cardiac monitoring
+
+DISPOSITION: Admit to CCU pending workup</div>
+
+                        <button class="primary-btn">Copy to Clipboard</button>
+                        <button class="secondary-btn">✏️ Edit Note</button>
+                        <button class="secondary-btn">📧 Send to EMR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Screen -->
+            <div class="screen" id="statsScreen">
+                <div class="header">
+                    <button class="icon-btn" onclick="showScreen('homeScreen')">←</button>
+                    <h2 class="screen-title">Analytics</h2>
+                    <button class="icon-btn">↗</button>
+                </div>
+
+                <div class="tab-nav">
+                    <button class="tab-btn active" onclick="switchStatsTab('daily')">Daily</button>
+                    <button class="tab-btn" onclick="switchStatsTab('weekly')">Weekly</button>
+                    <button class="tab-btn" onclick="switchStatsTab('monthly')">Monthly</button>
+                    <button class="tab-btn" onclick="switchStatsTab('yearly')">Yearly</button>
+                </div>
+
+                <div class="main-content">
+                    <!-- Daily Stats -->
+                    <div id="stats-daily" class="stats-tab-content">
+                        <p class="section-label">Today - December 28, 2025</p>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">12</div>
+                                <div class="stat-label">Total Patients</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">+3 from yesterday</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">3</div>
+                                <div class="stat-label">Urgent Cases</div>
+                                <div style="font-size: 12px; color: #dc2626; margin-top: 4px;">+1 from yesterday</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">2.4h</div>
+                                <div class="stat-label">Avg Time/Patient</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">-0.3h from yesterday</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Completed</div>
+                                <div style="font-size: 12px; color: #667eea; margin-top: 4px;">4 active</div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Hourly Patient Volume</p>
+                        <div class="card">
+                            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 120px; gap: 4px;">
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 25%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 40%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 55%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 85%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 100%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 70%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 45%; border-radius: 4px 4px 0 0;"></div>
+                                <div style="flex: 1; background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 30%; border-radius: 4px 4px 0 0;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #64748b;">
+                                <span>8AM</span>
+                                <span>10AM</span>
+                                <span>12PM</span>
+                                <span>2PM</span>
+                                <span>4PM</span>
+                                <span>6PM</span>
+                                <span>8PM</span>
+                                <span>Now</span>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Today's Diagnoses</p>
+                        <div class="card">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Myocardial Infarction</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #dc2626;">2</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #dc2626; height: 100%; width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Pneumonia</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #f59e0b;">3</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #f59e0b; height: 100%; width: 60%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">GERD</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #059669;">4</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #059669; height: 100%; width: 80%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Urgency Breakdown</p>
+                        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="stat-card" style="border-left: 4px solid #dc2626;">
+                                <div class="stat-number">3</div>
+                                <div class="stat-label">Critical</div>
+                            </div>
+                            <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                                <div class="stat-number">5</div>
+                                <div class="stat-label">Moderate</div>
+                            </div>
+                            <div class="stat-card" style="border-left: 4px solid #059669;">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Routine</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Stats -->
+                    <div id="stats-weekly" class="stats-tab-content" style="display: none;">
+                        <p class="section-label">This Week - Dec 22-28, 2025</p>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">67</div>
+                                <div class="stat-label">Total Patients</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">+12% from last week</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">14</div>
+                                <div class="stat-label">Urgent Cases</div>
+                                <div style="font-size: 12px; color: #dc2626; margin-top: 4px;">Same as last week</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">2.1h</div>
+                                <div class="stat-label">Avg Time/Patient</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">-0.2h improvement</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">96%</div>
+                                <div class="stat-label">Accuracy Rate</div>
+                                <div style="font-size: 12px; color: #667eea; margin-top: 4px;">+2% from last week</div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Daily Patient Volume</p>
+                        <div class="card">
+                            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 140px; gap: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 90px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Mon</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">9</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 110px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Tue</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">11</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 85px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Wed</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">8</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 125px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Thu</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">13</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 105px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Fri</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">10</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 70px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Sat</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">6</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 95px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Sun</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">10</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Top Diagnoses This Week</p>
+                        <div class="card">
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Pneumonia</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #667eea;">12</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 60%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Myocardial Infarction</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #667eea;">8</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">GERD</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #667eea;">7</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 35%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Type 2 Diabetes</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #667eea;">6</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 30%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 15px; font-weight: 600;">Hypertension</span>
+                                    <span style="font-size: 15px; font-weight: 600; color: #667eea;">5</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 25%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Patient Outcomes</p>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">48</div>
+                                <div class="stat-label">Discharged</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">15</div>
+                                <div class="stat-label">Admitted</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Referred</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Stats -->
+                    <div id="stats-monthly" class="stats-tab-content" style="display: none;">
+                        <p class="section-label">December 2025</p>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">284</div>
+                                <div class="stat-label">Total Patients</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">+8% from November</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">52</div>
+                                <div class="stat-label">Urgent Cases</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">18% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">2.3h</div>
+                                <div class="stat-label">Avg Time/Patient</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">-0.4h improvement</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">95%</div>
+                                <div class="stat-label">Accuracy Rate</div>
+                                <div style="font-size: 12px; color: #667eea; margin-top: 4px;">+1% from November</div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Weekly Trends</p>
+                        <div class="card">
+                            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 140px; gap: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 85px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Week 1</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">58</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 95px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Week 2</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">64</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 110px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Week 3</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">75</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 125px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #64748b; font-weight: 600;">Week 4</div>
+                                    <div style="text-align: center; font-size: 13px; color: #1e293b; font-weight: 700;">87</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Top 10 Diagnoses</p>
+                        <div class="card">
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">1. Pneumonia</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">48</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">2. Myocardial Infarction</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">32</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 53%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">3. Type 2 Diabetes</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">28</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 47%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">4. GERD</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">24</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">5. Hypertension</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">21</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 35%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">6. Acute Appendicitis</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">18</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 30%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">7. Stroke</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">15</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 25%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">8. Migraine</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">13</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 22%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">9. Asthma Exacerbation</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">11</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 18%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">10. UTI</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">9</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 15%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Monthly Performance</p>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">215</div>
+                                <div class="stat-label">Discharged</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">76% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">58</div>
+                                <div class="stat-label">Admitted</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">20% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">11</div>
+                                <div class="stat-label">Referred</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">4% of total</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yearly Stats -->
+                    <div id="stats-yearly" class="stats-tab-content" style="display: none;">
+                        <p class="section-label">2025 Annual Report</p>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">3,482</div>
+                                <div class="stat-label">Total Patients</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">+23% from 2024</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">621</div>
+                                <div class="stat-label">Urgent Cases</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">18% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">2.2h</div>
+                                <div class="stat-label">Avg Time/Patient</div>
+                                <div style="font-size: 12px; color: #059669; margin-top: 4px;">-1.1h improvement</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">94%</div>
+                                <div class="stat-label">Avg Accuracy</div>
+                                <div style="font-size: 12px; color: #667eea; margin-top: 4px;">Industry leading</div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Monthly Patient Volume</p>
+                        <div class="card">
+                            <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 150px; gap: 4px;">
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 75px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Jan</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">242</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 68px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Feb</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">218</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 82px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Mar</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">265</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 88px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Apr</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">284</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 95px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">May</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">307</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 92px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Jun</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">296</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 98px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Jul</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">316</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 105px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Aug</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">338</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 85px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Sep</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">274</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 110px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Oct</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">354</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 102px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Nov</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">329</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(to top, #667eea 0%, #764ba2 100%); height: 88px; border-radius: 4px 4px 0 0;"></div>
+                                    <div style="text-align: center; margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 600;">Dec</div>
+                                    <div style="text-align: center; font-size: 11px; color: #1e293b; font-weight: 700;">284</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Diagnosis Categories</p>
+                        <div class="card">
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Cardiovascular</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #dc2626;">824</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #dc2626; height: 100%; width: 55%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Respiratory</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #f59e0b;">687</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #f59e0b; height: 100%; width: 45%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Gastrointestinal</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">542</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #667eea; height: 100%; width: 36%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Endocrine</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">438</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #667eea; height: 100%; width: 29%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Neurological</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">362</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #667eea; height: 100%; width: 24%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 14px; font-weight: 600;">Other</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;">629</span>
+                                </div>
+                                <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #667eea; height: 100%; width: 42%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-label">Annual Performance</p>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">2,648</div>
+                                <div class="stat-label">Discharged</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">76% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">694</div>
+                                <div class="stat-label">Admitted</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">20% of total</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">140</div>
+                                <div class="stat-label">Referred</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">4% of total</div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="background: #eff6ff; border-color: #bfdbfe; margin-top: 20px;">
+                            <h3 style="font-size: 15px; font-weight: 600; color: #1e40af; margin-bottom: 8px;">Year in Review</h3>
+                            <p style="font-size: 14px; color: #1e40af; line-height: 1.6;">
+                                Exceptional year with 23% patient growth, improved diagnostic accuracy to 94%, and reduced average consultation time by 1.1 hours. Cardiovascular and respiratory cases remain the primary focus areas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Screen -->
+            <div class="screen" id="settingsScreen">
+                <div class="header">
+                    <button class="icon-btn" onclick="showScreen('homeScreen')">←</button>
+                    <h2 class="screen-title">Settings</h2>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div class="main-content">
+                    <!-- Profile Section -->
+                    <div style="background: white; border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 16px; border: 1px solid #e2e8f0;">
+                        <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">SC</div>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">Dr. Sarah Chen</h3>
+                            <p style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Internal Medicine</p>
+                            <p style="font-size: 13px; color: #059669; font-weight: 500;">License: CA-123456 ✓</p>
+                        </div>
+                        <button class="icon-btn">→</button>
+                    </div>
+
+                    <!-- General Preferences -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">General Preferences</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Voice Input</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Enable voice-to-text for symptoms</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Auto-save Notes</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Automatically save clinical notes</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Offline Mode</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Access cached data without internet</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Language</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">App display language</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>Hindi</option>
+                                <option>Mandarin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Notifications</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Critical Lab Results</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Alert for abnormal lab values</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Patient Follow-ups</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Reminders for patient check-ins</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Drug Interactions</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Warn about medication conflicts</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">New Guidelines</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Updates to clinical guidelines</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Sound</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Notification sounds</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Settings -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Clinical Settings</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Specialty Focus</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Prioritize diagnoses by specialty</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option>General</option>
+                                <option selected>Cardiology</option>
+                                <option>Neurology</option>
+                                <option>Pediatrics</option>
+                                <option>Emergency</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">AI Confidence Threshold</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Minimum confidence to show diagnosis</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option>30%</option>
+                                <option>40%</option>
+                                <option selected>50%</option>
+                                <option>60%</option>
+                                <option>70%</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Show ICD-10 Codes</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Display codes with diagnoses</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Auto-order Labs</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Suggest labs for top diagnoses</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Evidence Citations</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Show PubMed references</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Display & Interface -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Display & Interface</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Theme</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">App color scheme</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option selected>Light</option>
+                                <option>Dark</option>
+                                <option>Auto</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Text Size</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Adjust font size</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option>Small</option>
+                                <option selected>Medium</option>
+                                <option>Large</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Color-coded Urgency</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Use colors for severity levels</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Compact View</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Show more info on screen</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Animations</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Enable UI transitions</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Privacy & Security -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Privacy & Security</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Biometric Login</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Use Face ID / Touch ID</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Auto-lock</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Lock after inactivity</div>
+                            </div>
+                            <select style="padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; font-weight: 600;">
+                                <option>Never</option>
+                                <option>5 min</option>
+                                <option selected>15 min</option>
+                                <option>30 min</option>
+                                <option>1 hour</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Encrypted Backup</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">End-to-end encryption</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Analytics Sharing</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Share anonymized usage data</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Data Management</h3>
+                        
+                        <div style="padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Cache Size</div>
+                                <div style="font-size: 15px; font-weight: 600; color: #667eea;">842 MB</div>
+                            </div>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Medical literature and guidelines</div>
+                        </div>
+
+                        <div style="padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Last Sync</div>
+                                <div style="font-size: 14px; color: #64748b;">2 hours ago</div>
+                            </div>
+                            <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Patient data synchronized</div>
+                        </div>
+
+                        <div style="padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Auto-sync</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Sync on Wi-Fi only</div>
+                            </div>
+                            <label class="toggle-switch" style="margin-top: 8px;">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="padding: 14px 0;">
+                            <button class="secondary-btn" style="margin-bottom: 10px;">Clear Cache</button>
+                            <button class="secondary-btn">Sync Now</button>
+                        </div>
+                    </div>
+
+                    <!-- Integrations -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Integrations</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">EMR System</div>
+                                <div style="font-size: 13px; color: #059669; margin-top: 2px;">Connected: Epic MyChart</div>
+                            </div>
+                            <button style="padding: 6px 14px; border: 2px solid #e2e8f0; border-radius: 10px; background: white; font-size: 13px; font-weight: 600; cursor: pointer;">Configure</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Calendar</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Not connected</div>
+                            </div>
+                            <button style="padding: 6px 14px; border: 2px solid #667eea; border-radius: 10px; background: white; color: #667eea; font-size: 13px; font-weight: 600; cursor: pointer;">Connect</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 15px; color: #1e293b;">Lab System</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 2px;">Not connected</div>
+                            </div>
+                            <button style="padding: 6px 14px; border: 2px solid #667eea; border-radius: 10px; background: white; color: #667eea; font-size: 13px; font-weight: 600; cursor: pointer;">Connect</button>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="card">
+                        <h3 style="font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">About</h3>
+                        
+                        <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <span style="font-weight: 600; color: #1e293b;">Version</span>
+                            <span style="color: #64748b;">2.4.1</span>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f1f5f9;">
+                            <span style="font-weight: 600; color: #1e293b;">Build</span>
+                            <span style="color: #64748b;">2025.12.28</span>
+                        </div>
+
+                        <div style="padding: 14px 0;">
+                            <button class="secondary-btn" style="margin-bottom: 10px;">Terms of Service</button>
+                            <button class="secondary-btn" style="margin-bottom: 10px;">Privacy Policy</button>
+                            <button class="secondary-btn">Help & Support</button>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <button class="secondary-btn" style="color: #ef4444; border-color: #fecaca; margin-top: 10px;">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPatient = null;
+        let currentTab = 'overview';
+
+        // Screen navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // View patient
+        function viewPatient(id) {
+            currentPatient = id;
+            
+            // Update patient name in header
+            const names = {
+                1: 'Robert S.',
+                2: 'Maria P.',
+                3: 'Karen L.',
+                4: 'David B.'
+            };
+            document.getElementById('patientName').textContent = names[id];
+            
+            // Switch to overview tab
+            switchTab('overview');
+            showScreen('patientScreen');
+        }
+
+        // Switch tab
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('tab-' + tabName).style.display = 'block';
+        }
+
+        // Switch stats tab
+        function switchStatsTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('#statsScreen .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update stats tab content
+            document.querySelectorAll('.stats-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('stats-' + tabName).style.display = 'block';
+        }
+
+        // Create new patient
+        function createPatient() {
+            alert('Patient created! In production, this would create a new patient record.');
+            showScreen('homeScreen');
+        }
+    </script>
+</body>
+</html>
